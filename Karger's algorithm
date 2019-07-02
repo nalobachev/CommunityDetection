@@ -3,6 +3,7 @@ import csv
 import matplotlib.pyplot as plt
 from random import choice
 
+
 with open('data.csv', 'r') as csvfile:
     people = csv.reader(csvfile, delimiter=',')
     groups = {}
@@ -21,30 +22,50 @@ for key in groups:
             G.add_edge(key, key2, capacity=common)
         else:
             continue
-# nx.draw_circular(G, node_color='#FF8C30')
-nx.draw_spring(G, with_labels=True, node_color='orange', node_size=50, edge_color='black', linewidths=1, font_size=2)
-plt.show()
-H = G.copy()
-T = H.copy()
-n1 = choice(list(H.nodes()))
-n2 = choice(list(H.nodes()))
 
-while n1 == n2:
-    n2 = choice(list(H.nodes()))
-cut_value, partition = nx.minimum_cut(H, n1, n2)
-reachable, non_reachable = partition
-
-if len(reachable) > len(non_reachable):
-    for node in reachable:
-        for neighbour in H.neighbors(node):
-            if neighbour not in reachable:
-                T.remove_edge(node, neighbour)
-else:
-    for node in non_reachable:
-        for neighbour in H.neighbors(node):
-            if neighbour not in non_reachable:
-                T.remove_edge(node, neighbour)
-# nx.draw_circular(T, node_color='#FF8C30')
-nx.draw(T, with_labels=True, node_color='orange', node_size=50, edge_color='black', linewidths=0.5, font_size=2)
+nx.draw(G, with_labels=True, node_color='orange', node_size=50, edge_color='black', linewidths=1, fontsize = 5)
 plt.show()
 
+gr = G.copy()
+data = {}
+
+for node in G.nodes():
+    data[node] = []
+
+while G.number_of_nodes () > 2:
+
+    #repait this part--------------
+    u = choice(list(G.nodes()))
+    v = choice (list (G.neighbors (u)))
+
+    #contract(u,v)
+    graph = G.copy()
+
+    for el in data[v]:
+        if el not in data[u]:
+            data[u].append(el)
+    data[u].append(v)
+    data.pop(v)
+
+    for node in graph.neighbors(v):
+        if node != u:
+            if node not in graph.neighbors(u):
+               G.add_edge(node,u)
+            G.remove_edge(node,v)
+    G.remove_edge(u,v)
+    G.remove_node(v)
+
+p,k = data.keys()
+data[p].append(p)
+data[k].append(k)
+
+gr1 = gr.copy()
+for node in data[p]:
+    for neighbour in gr.neighbors(node):
+        if neighbour not in data[p]:
+            gr1.remove_edge(neighbour,node)
+
+nx.draw(gr1, with_labels=False, node_color='orange', node_size=50, edge_color='black', linewidths=1)
+plt.show()
+
+print(*data)
