@@ -1,0 +1,50 @@
+import networkx as nx
+import csv
+import matplotlib.pyplot as plt
+from random import choice
+
+with open('data.csv', 'r') as csvfile:
+    people = csv.reader(csvfile, delimiter=',')
+    groups = {}
+    for row in people:
+        number = row[0]
+        groups[number] = set(row[1:])
+
+G = nx.Graph()
+sorted(groups)
+# for key in groups:
+#     G.add_node(key)
+for key in groups:
+    for key2 in groups:
+        common = len(groups[key] & groups[key2])
+        if (common > 50) and (key != key2) and (key2 > key):
+            G.add_edge(key, key2, capacity=common)
+        else:
+            continue
+# nx.draw_circular(G, node_color='#FF8C30')
+nx.draw_spring(G, with_labels=True, node_color='orange', node_size=50, edge_color='black', linewidths=1, font_size=2)
+plt.show()
+H = G.copy()
+T = H.copy()
+n1 = choice(list(H.nodes()))
+n2 = choice(list(H.nodes()))
+
+while n1 == n2:
+    n2 = choice(list(H.nodes()))
+cut_value, partition = nx.minimum_cut(H, n1, n2)
+reachable, non_reachable = partition
+
+if len(reachable) > len(non_reachable):
+    for node in reachable:
+        for neighbour in H.neighbors(node):
+            if neighbour not in reachable:
+                T.remove_edge(node, neighbour)
+else:
+    for node in non_reachable:
+        for neighbour in H.neighbors(node):
+            if neighbour not in non_reachable:
+                T.remove_edge(node, neighbour)
+# nx.draw_circular(T, node_color='#FF8C30')
+nx.draw(T, with_labels=True, node_color='orange', node_size=50, edge_color='black', linewidths=0.5, font_size=2)
+plt.show()
+
