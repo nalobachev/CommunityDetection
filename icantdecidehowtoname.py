@@ -2,6 +2,7 @@ import networkx as nx
 import csv
 import matplotlib.pyplot as plt
 from random import choice
+import community
 
 with open('data.csv', 'r') as csvfile:
     people = csv.reader(csvfile, delimiter=',')
@@ -53,4 +54,10 @@ def splitting(graph):
 
 splitting(G)
 nx.draw(G, with_labels=False, node_color='orange', node_size=50, edge_color='black', linewidths=1, font_size=15)
+plt.show()
+
+partition = community.best_partition(H)
+best = nx.Graph()
+best.add_edges_from([pair for pair in partition.items() if pair[1] == 1])
+nx.draw(best, with_labels=True, node_color='orange', node_size=50, edge_color='black', linewidths=1, font_size=5)
 plt.show()
