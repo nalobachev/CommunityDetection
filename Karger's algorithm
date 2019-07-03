@@ -3,6 +3,48 @@ import csv
 import matplotlib.pyplot as plt
 from random import choice
 
+def Karger(G):
+    gr = G.copy ()
+    data = {}
+
+    for node in G.nodes ():
+        data[node] = []
+
+    while G.number_of_nodes () > 2:
+        u = choice (list (G.nodes ()))
+        if not list (G.neighbors (u)):
+            while not list (G.neighbors (u)):
+                u = choice (list (G.nodes ()))
+
+        v = choice (list (G.neighbors (u)))
+
+        # contract(u,v)
+        graph = G.copy ()
+
+        for el in data[v]:
+            if el not in data[u]:
+                data[u].append (el)
+        data[u].append (v)
+        data.pop (v)
+
+        for node in graph.neighbors (v):
+            if node != u:
+                if node not in graph.neighbors (u):
+                    G.add_edge (node, u)
+                G.remove_edge (node, v)
+        G.remove_edge (u, v)
+        G.remove_node (v)
+
+    p, k = data.keys ()
+    data[p].append (p)
+    data[k].append (k)
+
+    gr1 = gr.copy ()
+    for node in data[p]:
+        for neighbour in gr.neighbors (node):
+            if neighbour not in data[p]:
+                gr1.remove_edge (neighbour, node)
+    return gr1
 
 with open('data.csv', 'r') as csvfile:
     people = csv.reader(csvfile, delimiter=',')
@@ -13,59 +55,21 @@ with open('data.csv', 'r') as csvfile:
 
 G = nx.Graph()
 sorted(groups)
-# for key in groups:
-#     G.add_node(key)
+#for key in groups:
+    #G.add_node(key)
 for key in groups:
     for key2 in groups:
         common = len(groups[key] & groups[key2])
-        if (common > 50) and (key != key2) and (key2 > key):
+        if (common > 15) and (key != key2) and (key2 > key):
             G.add_edge(key, key2, capacity=common)
         else:
             continue
 
-nx.draw(G, with_labels=True, node_color='orange', node_size=50, edge_color='black', linewidths=1, fontsize = 5)
+nx.draw(G, with_labels=False, node_color='orange', node_size=50, edge_color='black', linewidths=1)
 plt.show()
 
-gr = G.copy()
-data = {}
+for i in range(100):
+    G = Karger(G)
 
-for node in G.nodes():
-    data[node] = []
-
-while G.number_of_nodes () > 2:
-
-    #repait this part--------------
-    u = choice(list(G.nodes()))
-    v = choice (list (G.neighbors (u)))
-
-    #contract(u,v)
-    graph = G.copy()
-
-    for el in data[v]:
-        if el not in data[u]:
-            data[u].append(el)
-    data[u].append(v)
-    data.pop(v)
-
-    for node in graph.neighbors(v):
-        if node != u:
-            if node not in graph.neighbors(u):
-               G.add_edge(node,u)
-            G.remove_edge(node,v)
-    G.remove_edge(u,v)
-    G.remove_node(v)
-
-p,k = data.keys()
-data[p].append(p)
-data[k].append(k)
-
-gr1 = gr.copy()
-for node in data[p]:
-    for neighbour in gr.neighbors(node):
-        if neighbour not in data[p]:
-            gr1.remove_edge(neighbour,node)
-
-nx.draw(gr1, with_labels=False, node_color='orange', node_size=50, edge_color='black', linewidths=1)
+nx.draw(G, with_labels=False, node_color='orange', node_size=50, edge_color='black', linewidths=1)
 plt.show()
-
-print(*data)
