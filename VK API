@@ -1,0 +1,52 @@
+import requests
+import time
+
+AccessToken = "3c5fea9dc6a74280ade44e3f82731de6f6fc4b16d97eaba5edef7827baed7ba82572472db596a199e8ec9"
+
+
+#function for listing all friends of user. It is not used in the program, but might be.
+def get_friends_user(user_id):
+    argument = (('access_token', AccessToken), ('user_id', '%s' % user_id), ('v', '5.100'), ('count', '1000'))
+    answer = requests.get('https://api.vk.com/method/friends.get', params=argument)
+    groups = answer.json()["response"]["items"]
+    return groups
+
+
+def get_members_array(group_id):
+    array_of_members = []
+    argument = (('access_token', AccessToken), ('group_id', '%s' % group_id), ('v', '5.100'), ('count', '1000'))
+    answer = requests.get('https://api.vk.com/method/groups.getMembers', params=argument)
+    array_of_members += answer.json()["response"]["items"]
+    return array_of_members
+
+
+def _get_users_groups(user_id):
+    argument = (('access_token', AccessToken), ('user_id', '%s' % user_id), ('v', '5.100'), ('count', '1000'))
+    answer = requests.get('https://api.vk.com/method/groups.get', params=argument)
+    groups = answer.json()["response"]["items"]
+    return groups
+
+
+def _get_user_data(array_of_members):
+    final_dict = {}
+    for id in range(0, len(array_of_members)):
+        if id % 3 == 0:
+            time.sleep(1)
+        try:
+            groups = ','.join(map(str, _get_users_groups(array_of_members[id])))
+            final_dict[array_of_members[id]] = groups
+        except KeyError: pass
+    return final_dict
+
+
+def main_call(group_id):
+    array_of_members = get_members_array(group_id)
+    print("Members obtained")
+    final_dict = _get_user_data(array_of_members)
+    print("Data obtained")
+    with open('data.csv', 'w') as f:
+        for user_id in final_dict.keys():
+            f.write("%s,%s\n" % (user_id, final_dict[user_id]))
+
+
+main_call("sashershakov")
