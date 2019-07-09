@@ -1,8 +1,6 @@
 import requests
 import time
 
-AccessToken = "3c5fea9dc6a74280ade44e3f82731de6f6fc4b16d97eaba5edef7827baed7ba82572472db596a199e8ec9"
-
 
 #function for listing all friends of user. It is not used in the program, but might be.
 def get_friends_user(user_id):
